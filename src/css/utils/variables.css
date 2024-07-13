@@ -1,0 +1,16 @@
+:root {
+    /* Colors */
+    --body-bg: linear-gradient(0.00deg, rgb(0, 0, 0) -13.994%, rgba(0, 0, 0, 0) 79.141%);
+
+    --container-bg-dark: #102136;
+    --container-bg-dark-light: rgba(16, 33, 54, 0.6);
+
+    --text-color: #000000;
+    --orange-text-color: #FF6B09;
+    --primary-text-color-dark: #FFFFFF;
+    --secondary-text-color-dark: #767D85;
+
+    --button-bg-city: rgba(16, 33, 54, 0.5);
+    --button-bg-arrow: rgba(255, 255, 255, 0.2);
+    --button-bg-days: rgba(255, 255, 255, 0.5);
+}
