@@ -2,4 +2,6 @@
 
 // 968170fef43881d658104c3ff624c9a8
 
+// 41802498-7aef04e1b4b4791f33c618bc1 PixaBay
+
 import './js/hero';
