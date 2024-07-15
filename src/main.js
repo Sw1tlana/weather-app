@@ -5,3 +5,4 @@
 // 41802498-7aef04e1b4b4791f33c618bc1 PixaBay
 
 import './js/hero';
+import './js/days';
