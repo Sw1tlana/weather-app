@@ -18,7 +18,7 @@ let globalCityName = '';
 
 async function getWeatherData(cityName) {
     try {
-    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}&units=metric`;
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(cityName)}&appid=${API_KEY}&units=metric`;
       
         const response = await axios.get(url);
         globalWeatherData = response.data;
@@ -47,6 +47,7 @@ async function getTodayWeatherData(cityName) {
 
 refs.searchForm.addEventListener('submit', onSubmit);
 refs.todayBtn.addEventListener('click', onTodayButtonClick);
+refs.btnDays.addEventListener('click', onDaysButtonClick)
 
 async function onSubmit(evt) {
     evt.preventDefault();
@@ -90,52 +91,56 @@ function displayWeatherData(data) {
 
 };
 
+const formatTime = (timestamp, timezoneOffset) => {
+  const date = new Date((timestamp + timezoneOffset) * 1000);
+  return date.toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' });
+};
+
+const formatDate = (timestamp, timezoneOffset) => {
+  const date = new Date((timestamp + timezoneOffset) * 1000);
+  const day = date.getDate();
+  const dayOfWeek = date.toLocaleDateString("en-GB", { weekday: 'short' });
+  const month = date.toLocaleDateString("en-GB", { month: 'long' });
+  const year = date.getFullYear();
+  return `${day}th ${dayOfWeek}\n${month} ${year}`;
+};
 
 function displayWeatherDataInfo(data) {
-    refs.containerDaysInfo.innerHTML = '';
+  refs.containerDaysInfo.innerHTML = '';
 
-    if (data && data.list && data.list.length > 0 && data.daily && data.daily.length > 0) {
-        const item = data.list[0];
+  const item = data.list[0];
 
-        const itemDate = new Date(item.dt_txt);
-        const day = itemDate.getDate();
-        const month = itemDate.toLocaleString('default', { month: 'long' });
+  // Отримуємо основні дані з відповіді
+  const date = new Date((item.dt + data.city.timezone) * 1000);
+  const formattedDate = formatDate(item.dt, data.city.timezone);
+  const sunrise = formatTime(data.city.sunrise, data.city.timezone);
+  const sunset = formatTime(data.city.sunset, data.city.timezone);
 
-        const formattedHours = String(itemDate.getHours()).padStart(2, '0');
-        const formattedMinutes = String(itemDate.getMinutes()).padStart(2, '0');
-        const formattedSeconds = String(itemDate.getSeconds()).padStart(2, '0');
+  // Отримуємо час
+  const time = date.toLocaleTimeString("en-GB");
+  const [formattedHours, formattedMinutes, formattedSeconds] = time.split(':');
 
-        const sunriseDate = new Date(data.daily[0].sunrise * 1000);
-        const sunriseHours = String(sunriseDate.getHours()).padStart(2, '0');
-        const sunriseMinutes = String(sunriseDate.getMinutes()).padStart(2, '0');
-        
-        // Handling timezone offset
-        const sunriseOffset = sunriseDate.getTimezoneOffset() / 60; // in hours
-        sunriseDate.setHours(sunriseDate.getHours() + sunriseOffset);
+  // Форматуємо час сходу та заходу сонця
+  const [sunriseHours, sunriseMinutes] = sunrise.split(':');
+    const [sunsetHours, sunsetMinutes] = sunset.split(':');
+    
+      const sunriseIcon = `<svg class="icon-social" width="14.5" height="14.5">
+                            <use href="/images/icons-sprite.svg#icon-Sunrise"></use>
+                          </svg>`;
+      const sunsetIcon = `<svg class="icon-social" width="14.5" height="14.5">
+                            <use href="/images/icons-sprite.svg#icon-Sunset"></use>
+                         </svg>`;
 
-        const sunsetDate = new Date(data.daily[0].sunset * 1000);
-        const sunsetHours = String(sunsetDate.getHours()).padStart(2, '0');
-        const sunsetMinutes = String(sunsetDate.getMinutes()).padStart(2, '0');
+  const dayInfoHTML = `
+    <div class="day-info">
+      <h3>${formattedDate}</h3>
+      <h3>${formattedHours}:${formattedMinutes}:${formattedSeconds}</h3>
+      <p>${sunriseIcon} ${sunriseHours}:${sunriseMinutes} ${sunsetIcon} ${sunsetHours}:${sunsetMinutes}</p>
+    </div>
+  `;
 
-        // Handling timezone offset
-        const sunsetOffset = sunsetDate.getTimezoneOffset() / 60; // in hours
-        sunsetDate.setHours(sunsetDate.getHours() + sunsetOffset);
-
-        const dayInfoHTML = `
-            <div class="day-info">
-                <h3>${day}th ${month} ${formattedHours}:${formattedMinutes}:${formattedSeconds}</h3>
-                <p>Sunrise ${sunriseHours}:${sunriseMinutes}</p>
-                <p>Sunset ${sunsetHours}:${sunsetMinutes}</p>
-            </div>
-        `;
-
-        refs.containerDaysInfo.innerHTML = dayInfoHTML;
-    } else {
-        console.error('No valid weather data available or data structure is incorrect.', data);
-        refs.containerDaysInfo.innerHTML = '<p>No valid weather data available.</p>';
-    }
-}  
-
+  refs.containerDaysInfo.innerHTML = dayInfoHTML;
+};
 
 async function getCityImages(cityName) {
     try {
@@ -177,17 +182,18 @@ async function onTodayButtonClick() {
     }
 };
 
-// async function onDaysButtonClick() {
-//     if (globalCityName && globalWeatherData) {
-//         try {
-//             applyBodyBackground(globalCityName);
-//             displayWeatherData(globalWeatherData);
-//             displayWeatherDataInfo(globalWeatherData); // Виклик нової функції для відображення в іншому контейнері
-//         } catch (error) {
-//             console.error(error);
-//         }
-//     }
-// }
+async function onDaysButtonClick() {
+    try {
+        if (globalCityName) {
+            const weatherForecast = await getFiveDayWeatherForecast(globalCityName);
+            displayWeatherForecast(weatherForecast);
+        } else {
+            console.error('Global city name not set.');
+        }
+    } catch (error) {
+        console.error('Error fetching weather forecast:', error);
+    }
+}
 
 
 
