@@ -1,5 +1,6 @@
 
 import axios from "axios";
+import { getFiveDayWeatherForecast, displayWeatherForecast } from './days';
 
 const API_KEY = 'a4736bdfbd8c27f40a91e4af0f4f4383';
 const PIXABAY_API_KEY = '41802498-7aef04e1b4b4791f33c618bc1';
@@ -10,7 +11,9 @@ container: document.querySelector('.container-info-city'),
 containerDaysInfo: document.querySelector('.container-info-days'),
 cityButtons: document.querySelectorAll('.container-button-city button'),
 todayBtn: document.querySelector('.btn-today'),
-btnDays: document.querySelector('.btn-days') 
+btnDays: document.querySelector('.btn-days'),
+forecastContainer: document.querySelector('.forecast-container'),
+ 
 };
 
 let globalWeatherData = null;
@@ -60,6 +63,7 @@ async function onSubmit(evt) {
             if (weatherData && weatherData.list && weatherData.list.length > 0) {
                 displayWeatherData(weatherData);
                 displayWeatherDataInfo(weatherData);
+                globalCityName = cityName;
             } else {
                 console.error('No weather data available or list is empty.');
             }
@@ -195,6 +199,7 @@ async function onDaysButtonClick() {
     }
 }
 
+export { refs, getWeatherData };
 
 
 
